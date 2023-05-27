@@ -9,6 +9,6 @@ const {
 const router = express.Router();
 
 router.get('/unpaid', [getProfile], getUnpaid);
-router.get('/:id/pay', [getProfile, isClientProfile], pay);
+router.post('/:id/pay', [getProfile, isClientProfile], pay);
 
 module.exports = router;

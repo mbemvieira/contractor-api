@@ -4,6 +4,7 @@ const { sequelize } = require('./models/model');
 const routerAdmin = require('./routes/admin');
 const routerContracts = require('./routes/contracts');
 const routerJobs = require('./routes/jobs');
+const routerBalances = require('./routes/balances');
 
 // App setup
 const app = express();
@@ -18,5 +19,6 @@ app.set('models', sequelize.models);
 app.use('/admin', routerAdmin);
 app.use('/contracts', routerContracts);
 app.use('/jobs', routerJobs);
+app.use('/balances', routerBalances);
 
 module.exports = app;

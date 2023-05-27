@@ -1,6 +1,6 @@
-const { Profile } = require('../src/models/Profile');
-const { Contract } = require('../src/models/Contract');
-const { Job } = require('../src/models/Job');
+const { sequelize } = require('../src/models/model');
+
+const { Contract, Job, Profile } = sequelize.models;
 
 /* WARNING THIS WILL DROP THE CURRENT DATABASE */
 

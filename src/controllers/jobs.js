@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { PROFILE_TYPE_CLIENT } = require('../repositories/constants');
+const { PROFILE_TYPE_CLIENT, CONTRACT_STATUS_IN_PROGRESS } = require('../repositories/constants');
 
 const getUnpaid = async (req, res) => {
   const { Contract, Job } = req.app.get('models');
@@ -10,7 +10,7 @@ const getUnpaid = async (req, res) => {
       model: Contract,
       where: {
         [profileType]: req.profile.id,
-        status: 'in_progress',
+        status: CONTRACT_STATUS_IN_PROGRESS,
       },
     },
     where: {
@@ -24,10 +24,23 @@ const getUnpaid = async (req, res) => {
 };
 
 const pay = async (req, res) => {
-  const { Job } = req.app.get('models');
+  const sequelize = req.app.get('sequelize');
+  const { Contract, Job, Profile } = req.app.get('models');
   const { id } = req.params;
+  const { profile } = req;
 
   const job = await Job.findOne({
+    include: {
+      model: Contract,
+      include: {
+        model: Profile,
+        as: 'Contractor',
+      },
+      where: {
+        ClientId: req.profile.id,
+        status: CONTRACT_STATUS_IN_PROGRESS,
+      },
+    },
     where: {
       id,
     },
@@ -37,19 +50,33 @@ const pay = async (req, res) => {
     return res.status(404).end();
   }
 
-  // Pay for a job, a client can only pay if his balance >= the amount to pay.
-  // The amount should be moved from the client's balance to the contractor balance.
+  if (job.paid) {
+    return res.status(422).end();
+  }
 
   if (req.profile.balance < job.price) {
     return res.status(422).send('insuficient funds').end();
   }
 
-  // subtract from client balance
-  // add to contractor balance
-  // change contract status?
-  // job status -> paid, payment date
+  try {
+    await sequelize.transaction(async (t) => {
+      await profile.update({ balance: profile.balance - job.price }, { transaction: t });
 
-  return res.json('');
+      await job.Contract.Contractor.update({
+        balance: job.Contract.Contractor.balance + job.price,
+      }, { transaction: t });
+
+      await job.update({
+        paid: true,
+        paymentDate: (new Date()).toISOString(),
+      }, { transaction: t });
+    });
+
+    return res.json(job);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).end();
+  }
 };
 
 module.exports = {

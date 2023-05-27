@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { PROFILE_TYPE_CLIENT } = require('../repositories/constants');
+const { PROFILE_TYPE_CLIENT, CONTRACT_STATUS_NEW, CONTRACT_STATUS_IN_PROGRESS } = require('../repositories/constants');
 
 const get = async (req, res) => {
   const { Contract } = req.app.get('models');
@@ -9,7 +9,7 @@ const get = async (req, res) => {
     where: {
       [profileType]: req.profile.id,
       status: {
-        [Op.in]: ['new', 'in_progress'],
+        [Op.in]: [CONTRACT_STATUS_NEW, CONTRACT_STATUS_IN_PROGRESS],
       },
     },
   });

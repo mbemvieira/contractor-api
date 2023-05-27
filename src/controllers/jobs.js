@@ -1,9 +1,9 @@
 const { Op } = require('sequelize');
-const { profileTypeClient } = require('../models/constants');
+const { PROFILE_TYPE_CLIENT } = require('../repositories/constants');
 
 const getUnpaid = async (req, res) => {
   const { Contract, Job } = req.app.get('models');
-  const profileType = req.profile.type === profileTypeClient ? 'ClientId' : 'ContractorId';
+  const profileType = req.profile.type === PROFILE_TYPE_CLIENT ? 'ClientId' : 'ContractorId';
 
   const results = await Job.findAll({
     include: {
@@ -38,7 +38,7 @@ const pay = async (req, res) => {
   }
 
   // Pay for a job, a client can only pay if his balance >= the amount to pay.
-  //   The amount should be moved from the client's balance to the contractor balance.
+  // The amount should be moved from the client's balance to the contractor balance.
 
   if (req.profile.balance < job.price) {
     return res.status(422).send('insuficient funds').end();

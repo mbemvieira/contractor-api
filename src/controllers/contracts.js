@@ -1,9 +1,9 @@
 const { Op } = require('sequelize');
-const { profileTypeClient } = require('../models/constants');
+const { PROFILE_TYPE_CLIENT } = require('../repositories/constants');
 
 const get = async (req, res) => {
   const { Contract } = req.app.get('models');
-  const profileType = req.profile.type === profileTypeClient ? 'ClientId' : 'ContractorId';
+  const profileType = req.profile.type === PROFILE_TYPE_CLIENT ? 'ClientId' : 'ContractorId';
 
   const contracts = await Contract.findAll({
     where: {
@@ -20,7 +20,7 @@ const get = async (req, res) => {
 const getById = async (req, res) => {
   const { Contract } = req.app.get('models');
   const { id } = req.params;
-  const profileType = req.profile.type === profileTypeClient ? 'ClientId' : 'ContractorId';
+  const profileType = req.profile.type === PROFILE_TYPE_CLIENT ? 'ClientId' : 'ContractorId';
 
   const contract = await Contract.findOne({
     where: {

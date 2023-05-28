@@ -1,10 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { sequelize } = require('./models/model');
 const routerAdmin = require('./routes/admin');
 const routerContracts = require('./routes/contracts');
 const routerJobs = require('./routes/jobs');
 const routerBalances = require('./routes/balances');
+const { initModels } = require('./database/model');
 
 // App setup
 const app = express();
@@ -12,6 +12,8 @@ const app = express();
 app.use(bodyParser.json());
 
 // Metadata setup
+const sequelize = initModels();
+
 app.set('sequelize', sequelize);
 app.set('models', sequelize.models);
 

@@ -23,6 +23,20 @@ const initModels = () => {
   return sequelize;
 };
 
+/* WARNING THIS WILL DROP THE CURRENT DATABASE */
+const insertMany = async (model, dataset) => {
+  await model.sync({ force: true });
+
+  const promises = [];
+
+  for (let i = 0; i < dataset.length; i += 1) {
+    promises.push(model.create(dataset[i]));
+  }
+
+  return Promise.all(promises);
+};
+
 module.exports = {
   initModels,
+  insertMany,
 };

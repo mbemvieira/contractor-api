@@ -29,37 +29,40 @@ const pay = async (req, res) => {
   const { id } = req.params;
   const { profile } = req;
 
-  const job = await Job.findOne({
-    include: {
-      model: Contract,
-      include: {
-        model: Profile,
-        as: 'Contractor',
-      },
-      where: {
-        ClientId: req.profile.id,
-        status: CONTRACT_STATUS_IN_PROGRESS,
-      },
-    },
-    where: {
-      id,
-    },
-  });
-
-  if (!job) {
-    return res.status(404).end();
-  }
-
-  if (job.paid) {
-    return res.status(422).end();
-  }
-
-  if (req.profile.balance < job.price) {
-    return res.status(422).send('insuficient funds').end();
-  }
-
   try {
-    await sequelize.transaction(async (t) => {
+    const responseJob = await sequelize.transaction(async (t) => {
+      const job = await Job.findOne({
+        include: {
+          model: Contract,
+          include: {
+            model: Profile,
+            as: 'Contractor',
+          },
+          where: {
+            ClientId: req.profile.id,
+            status: CONTRACT_STATUS_IN_PROGRESS,
+          },
+        },
+        where: {
+          id,
+        },
+      }, {
+        transaction: t,
+        lock: true,
+      });
+
+      if (!job) {
+        return res.status(404).end();
+      }
+
+      if (job.paid) {
+        return res.status(422).end();
+      }
+
+      if (req.profile.balance < job.price) {
+        return res.status(422).send('insuficient funds').end();
+      }
+
       await profile.update({ balance: profile.balance - job.price }, { transaction: t });
 
       await job.Contract.Contractor.update({
@@ -70,9 +73,11 @@ const pay = async (req, res) => {
         paid: true,
         paymentDate: (new Date()).toISOString(),
       }, { transaction: t });
+
+      return job;
     });
 
-    return res.json(job);
+    return res.json(responseJob);
   } catch (error) {
     console.error(error);
     return res.status(500).end();

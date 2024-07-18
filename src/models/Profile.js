@@ -27,6 +27,7 @@ class Profile extends Sequelize.Model {
       {
         sequelize,
         modelName: 'Profile',
+        version: true,
       },
     );
   }

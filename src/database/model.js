@@ -7,6 +7,7 @@ const initModels = () => {
   const sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: './database.sqlite3',
+    logging: false,
   });
 
   Profile.initModel(sequelize);

@@ -1,6 +1,6 @@
 {
     "editor.codeActionsOnSave": {
-        "source.fixAll": true
+        "source.fixAll": "always"
     },
     "eslint.validate": ["javascript"],
     "editor.insertSpaces": true,

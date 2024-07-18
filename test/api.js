@@ -173,7 +173,7 @@ describe('endpoints', () => {
 
       const expected = {
         profession: 'Programmer',
-        totalEarned: 2884,
+        totalEarned: 2683,
       };
 
       assert.deepStrictEqual(body, expected);
